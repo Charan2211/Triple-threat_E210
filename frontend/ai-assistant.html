@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant - AI Business Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --ai-color: #0ea5e9;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message-user {
+            align-items: flex-end;
+        }
+        .message-ai {
+            align-items: flex-start;
+        }
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        .message-user .message-bubble {
+            background: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .message-ai .message-bubble {
+            background: white;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            border-bottom-left-radius: 4px;
+        }
+        .message-time {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .quick-action-btn {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quick-action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .ai-thinking {
+            display: flex;
+            align-items: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .ai-thinking .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 8px;
+        }
+        .recommendation-card {
+            border-left: 4px solid var(--ai-color);
+            background: #f0f9ff;
+            margin-bottom: 10px;
+        }
+        .chat-input-container {
+            border-top: 1px solid #e5e7eb;
+            padding: 20px;
+            background: white;
+        }
+        .ai-feature-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            height: 100%;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .ai-feature-card:hover {
+            border-color: var(--ai-color);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 col-lg-2 d-md-block sidebar collapse p-0">
+                <div class="position-sticky pt-3">
+                    <div class="text-center p-4">
+                        <h4><i class="fas fa-robot me-2"></i>AI Business Assistant</h4>
+                        <small class="text-light">Small Business Platform</small>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="vendor-dashboard.html">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="advertising.html">
+                                <i class="fas fa-bullhorn me-2"></i>Advertising
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="content-studio.html">
+                                <i class="fas fa-pencil-alt me-2"></i>Content Studio
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="fundraising-hub.html">
+                                <i class="fas fa-hand-holding-usd me-2"></i>Fundraising
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="collaboration-board.html">
+                                <i class="fas fa-handshake me-2"></i>Collaboration
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i class="fas fa-robot me-2"></i>AI Assistant
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="mt-5 p-3">
+                        <div class="card bg-dark text-white">
+                            <div class="card-body">
+                                <h6><i class="fas fa-lightbulb me-2"></i>AI Tip</h6>
+                                <small id="ai-tip">Ask me anything about your business growth!</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 col-lg-10 ms-sm-auto px-4 py-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2><i class="fas fa-robot me-2"></i>AI Business Assistant</h2>
+                        <p class="text-muted">Get personalized advice and recommendations for your business</p>
+                    </div>
+                    <div class="d-flex">
+                        <button class="btn btn-outline-primary me-2" onclick="clearChat()">
+                            <i class="fas fa-trash me-2"></i>Clear Chat
+                        </button>
+                        <button class="btn btn-primary" onclick="getRecommendations()">
+                            <i class="fas fa-magic me-2"></i>Get Recommendations
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Features Grid -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="ai-feature-card" onclick="quickQuestion('advertising')">
+                            <div class="mb-3">
+                                <i class="fas fa-bullhorn fa-2x text-primary"></i>
+                            </div>
+                            <h5>Advertising Help</h5>
+                            <p class="text-muted small">Get ad copy, campaign ideas, and optimization tips</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="ai-feature-card" onclick="quickQuestion('content')">
+                            <div class="mb-3">
+                                <i class="fas fa-pencil-alt fa-2x text-primary"></i>
+                            </div>
+                            <h5>Content Creation</h5>
+                            <p class="text-muted small">Generate content ideas, hashtags, and post suggestions</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="ai-feature-card" onclick="quickQuestion('funding')">
+                            <div class="mb-3">
+                                <i class="fas fa-hand-holding-usd fa-2x text-primary"></i>
+                            </div>
+                            <h5>Fundraising Advice</h5>
+                            <p class="text-muted small">Get pitch feedback and investor strategy</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="ai-feature-card" onclick="quickQuestion('strategy')">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-line fa-2x text-primary"></i>
+                            </div>
+                            <h5>Business Strategy</h5>
+                            <p class="text-muted small">Growth strategies and problem-solving</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Interface -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-comments me-2"></i>Chat with AI Assistant</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="chat-container" id="chat-container">
+                                    <!-- Chat messages will appear here -->
+                                    <div class="message message-ai">
+                                        <div class="message-bubble">
+                                            <strong>👋 Hello! I'm your AI Business Assistant.</strong><br><br>
+                                            I can help you with:
+                                            <ul class="mb-0">
+                                                <li>Advertising and marketing strategies</li>
+                                                <li>Content creation and scheduling</li>
+                                                <li>Fundraising and investor pitching</li>
+                                                <li>Business growth recommendations</li>
+                                                <li>Problem-solving and strategy</li>
+                                            </ul>
+                                            <br>
+                                            What would you like help with today?
+                                        </div>
+                                        <div class="message-time">Just now</div>
+                                        
+                                        <div class="quick-actions">
+                                            <div class="quick-action-btn" onclick="quickQuestion('advertising')">
+                                                Help with advertising
+                                            </div>
+                                            <div class="quick-action-btn" onclick="quickQuestion('content')">
+                                                Content ideas
+                                            </div>
+                                            <div class="quick-action-btn" onclick="quickQuestion('funding')">
+                                                Fundraising advice
+                                            </div>
+                                            <div class="quick-action-btn" onclick="quickQuestion('strategy')">
+                                                Business strategy
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="chat-input-container">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="message-input" 
+                                               placeholder="Type your message here..." 
+                                               onkeypress="handleKeyPress(event)">
+                                        <button class="btn btn-primary" type="button" onclick="sendMessage()">
+                                            <i class="fas fa-paper-plane"></i> Send
+                                        </button>
+                                    </div>
+                                    <div class="mt-2 text-muted small">
+                                        <i class="fas fa-lightbulb me-1"></i>
+                                        Try asking: "How can I improve my Facebook ads?" or "Give me content ideas"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations Sidebar -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-star me-2"></i>AI Recommendations</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="recommendations-list">
+                                    <div class="recommendation-card p-3 mb-3">
+                                        <h6><i class="fas fa-bullhorn me-2"></i>Advertising</h6>
+                                        <p class="small mb-2">Increase your Facebook ad budget by 20% for better reach</p>
+                                        <button class="btn btn-sm btn-primary">Apply</button>
+                                    </div>
+                                    
+                                    <div class="recommendation-card p-3 mb-3">
+                                        <h6><i class="fas fa-pencil-alt me-2"></i>Content</h6>
+                                        <p class="small mb-2">Post 3 times this week about your new product features</p>
+                                        <button class="btn btn-sm btn-primary">Schedule</button>
+                                    </div>
+                                    
+                                    <div class="recommendation-card p-3">
+                                        <h6><i class="fas fa-handshake me-2"></i>Collaboration</h6>
+                                        <p class="small mb-2">Partner with complementary businesses for cross-promotion</p>
+                                        <button class="btn btn-sm btn-primary">Find Partners</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h6>Quick Actions</h6>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-primary" onclick="generateAdCopy()">
+                                            <i class="fas fa-bullhorn me-2"></i>Generate Ad Copy
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="analyzePerformance()">
+                                            <i class="fas fa-chart-line me-2"></i>Analyze Performance
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="createBusinessPlan()">
+                                            <i class="fas fa-file-alt me-2"></i>Create Business Plan
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let chatHistory = [];
+        let isThinking = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadChatHistory();
+            updateAITips();
+        });
+
+        // Load chat history
+        function loadChatHistory() {
+            const savedChat = localStorage.getItem('ai_chat_history');
+            if (savedChat) {
+                chatHistory = JSON.parse(savedChat);
+                renderChat();
+            }
+        }
+
+        // Save chat history
+        function saveChatHistory() {
+            localStorage.setItem('ai_chat_history', JSON.stringify(chatHistory));
+        }
+
+        // Render chat
+        function renderChat() {
+            const container = document.getElementById('chat-container');
+            container.innerHTML = '';
+            
+            // Add initial message if no history
+            if (chatHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="message message-ai">
+                        <div class="message-bubble">
+                            <strong>👋 Hello! I'm your AI Business Assistant.</strong><br><br>
+                            I can help you with:
+                            <ul class="mb-0">
+                                <li>Advertising and marketing strategies</li>
+                                <li>Content creation and scheduling</li>
+                                <li>Fundraising and investor pitching</li>
+                                <li>Business growth recommendations</li>
+                                <li>Problem-solving and strategy</li>
+                            </ul>
+                            <br>
+                            What would you like help with today?
+                        </div>
+                        <div class="message-time">Just now</div>
+                        
+                        <div class="quick-actions">
+                            <div class="quick-action-btn" onclick="quickQuestion('advertising')">
+                                Help with advertising
+                            </div>
+                            <div class="quick-action-btn" onclick="quickQuestion('content')">
+                                Content ideas
+                            </div>
+                            <div class="quick-action-btn" onclick="quickQuestion('funding')">
+                                Fundraising advice
+                            </div>
+                            <div class="quick-action-btn" onclick="quickQuestion('strategy')">
+                                Business strategy
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Render chat history
+            chatHistory.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message message-${msg.sender}`;
+                
+                const time = new Date(msg.timestamp).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                messageDiv.innerHTML = `
+                    <div class="message-bubble">
+                        ${msg.text}
+                    </div>
+                    <div class="message-time">${time}</div>
+                `;
+                
+                container.appendChild(messageDiv);
+            });
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (!message || isThinking) return;
+            
+            // Add user message
+            addMessage('user', message);
+            input.value = '';
+            
+            // Show thinking indicator
+            showThinking();
+            
+            // Simulate AI response (replace with actual API call)
+            setTimeout(() => {
+                hideThinking();
+                const response = generateAIResponse(message);
+                addMessage('ai', response);
+            }, 1000);
+        }
+
+        // Add message to chat
+        function addMessage(sender, text) {
+            const message = {
+                sender: sender,
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+            
+            chatHistory.push(message);
+            saveChatHistory();
+            renderChat();
+        }
+
+        // Show thinking indicator
+        function showThinking() {
+            isThinking = true;
+            const container = document.getElementById('chat-container');
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'message message-ai';
+            thinkingDiv.innerHTML = `
+                <div class="message-bubble">
+                    <div class="ai-thinking">
+                        <div class="spinner-border spinner-border-sm text-primary"></div>
+                        Thinking...
+                    </div>
+                </div>
+            `;
+            container.appendChild(thinkingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Hide thinking indicator
+        function hideThinking() {
+            isThinking = false;
+            const container = document.getElementById('chat-container');
+            const thinking = container.querySelector('.ai-thinking');
+            if (thinking) {
+                thinking.parentElement.parentElement.remove();
+            }
+        }
+
+        // Generate AI response (simulated)
+        function generateAIResponse(userMessage) {
+            const responses = {
+                'advertising': `Based on your business profile, I recommend:
+1. **Increase Facebook ad budget** by 20% for the next campaign
+2. **Test different ad creatives** - try video ads for higher engagement
+3. **Target lookalike audiences** based on your best customers
+4. **Optimize landing pages** for better conversion rates
+
+Would you like me to create a specific ad campaign for you?`,
+                
+                'content': `Here are some content ideas for this week:
+1. **Behind-the-scenes video** of your team at work
+2. **Customer testimonial post** featuring a happy client
+3. **Industry tip** related to your services
+4. **New product/service announcement**
+
+I can also help you schedule these posts. Would you like that?`,
+                
+                'funding': `For fundraising, I suggest:
+1. **Refine your pitch deck** to focus on the problem/solution
+2. **Target investors** in your industry (I can help find matches)
+3. **Prepare financial projections** for the next 3 years
+4. **Practice your pitch** with common investor questions
+
+Would you like me to generate a pitch deck template?`,
+                
+                'strategy': `For business growth, consider:
+1. **Diversify revenue streams** with complementary services
+2. **Build strategic partnerships** with related businesses
+3. **Invest in customer retention** (it's cheaper than acquisition)
+4. **Explore new markets** or customer segments
+
+What specific challenge are you facing right now?`
+            };
+            
+            const lowerMessage = userMessage.toLowerCase();
+            
+            // Check for keywords
+            if (lowerMessage.includes('ad') || lowerMessage.includes('market')) {
+                return responses.advertising;
+            } else if (lowerMessage.includes('content') || lowerMessage.includes('post')) {
+                return responses.content;
+            } else if (lowerMessage.includes('fund') || lowerMessage.includes('invest')) {
+                return responses.funding;
+            } else if (lowerMessage.includes('grow') || lowerMessage.includes('strategy')) {
+                return responses.strategy;
+            } else {
+                // Generic response
+                return `Thanks for your message: "${userMessage}" 
+
+I understand you're asking about this topic. As your AI business assistant, I can help you with:
+- Advertising and marketing strategies
+- Content creation and planning
+- Fundraising and investor relations
+- Business growth and optimization
+
+Could you provide more details about what specific help you need?`;
+            }
+        }
+
+        // Handle Enter key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Quick question buttons
+        function quickQuestion(topic) {
+            const questions = {
+                'advertising': 'How can I improve my advertising campaigns?',
+                'content': 'What content should I create this week?',
+                'funding': 'How do I prepare for fundraising?',
+                'strategy': 'What growth strategies should I focus on?'
+            };
+            
+            const question = questions[topic];
+            document.getElementById('message-input').value = question;
+            sendMessage();
+        }
+
+        // Clear chat
+        function clearChat() {
+            if (confirm('Clear all chat history?')) {
+                chatHistory = [];
+                saveChatHistory();
+                renderChat();
+            }
+        }
+
+        // Get recommendations
+        function getRecommendations() {
+            const recommendations = [
+                {
+                    title: "Advertising Optimization",
+                    text: "Your Facebook ads have a 2.1x ROI. Consider increasing budget by 30% for maximum performance.",
+                    action: "optimize_ads"
+                },
+                {
+                    title: "Content Strategy",
+                    text: "Post engagement drops on weekends. Schedule more content for Tuesday-Thursday.",
+                    action: "adjust_schedule"
+                },
+                {
+                    title: "Partnership Opportunity",
+                    text: "Find complementary businesses for cross-promotion. This could increase reach by 40%.",
+                    action: "find_partners"
+                }
+            ];
+            
+            const container = document.getElementById('recommendations-list');
+            let html = '';
+            
+            recommendations.forEach(rec => {
+                html += `
+                    <div class="recommendation-card p-3 mb-3">
+                        <h6><i class="fas fa-star me-2"></i>${rec.title}</h6>
+                        <p class="small mb-2">${rec.text}</p>
+                        <button class="btn btn-sm btn-primary" onclick="applyRecommendation('${rec.action}')">
+                            Apply
+                        </button>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // Add to chat
+            addMessage('ai', "I've analyzed your business and provided some recommendations. Check the recommendations sidebar for details!");
+        }
+
+        // Quick action functions
+        function generateAdCopy() {
+            const product = prompt('What product/service do you want ad copy for?');
+            if (product) {
+                const adCopy = `🚀 Discover Amazing ${product}! 
+
+Transform your experience with our innovative ${product.toLowerCase()}. 
+
+✅ Premium Quality
+✅ Easy to Use
+✅ Affordable Price
+
+👉 Limited Time Offer! Save 20% Today!
+
+#${product.replace(/\s+/g, '')} #business #innovation`;
+
+                addMessage('ai', `Here's some ad copy I generated for "${product}":\n\n${adCopy}\n\nWould you like me to help you launch this campaign?`);
+            }
+        }
+
+        function analyzePerformance() {
+            addMessage('ai', `Analyzing your business performance...
+            
+📊 **Performance Analysis:**
+- Advertising ROI: 2.5x (Good)
+- Content Engagement: 3.2% (Average)
+- Customer Acquisition Cost: $45 (Optimize)
+- Monthly Growth Rate: 12% (Excellent)
+
+🎯 **Recommendations:**
+1. Reduce customer acquisition cost by optimizing ad targeting
+2. Increase content posting frequency to 3x per week
+3. Implement email marketing for customer retention
+
+Would you like me to create an action plan for these improvements?`);
+        }
+
+        function createBusinessPlan() {
+            addMessage('ai', `I'll help you create a business plan. Let me ask a few questions:
+
+1. What's your primary revenue stream?
+2. Who are your target customers?
+3. What makes you different from competitors?
+4. What are your financial goals for the next year?
+
+Please answer these questions, and I'll generate a comprehensive business plan outline for you.`);
+        }
+
+        // Apply recommendation
+        function applyRecommendation(action) {
+            alert(`Applying recommendation: ${action}`);
+            // Implement recommendation logic
+        }
+
+        // Update AI tips
+        function updateAITips() {
+            const tips = [
+                "Ask me about advertising optimization strategies",
+                "I can help generate content ideas for your business",
+                "Need funding advice? I can help with pitch decks",
+                "Ask me to analyze your business performance",
+                "I can help you find partnership opportunities"
+            ];
+            
+            setInterval(() => {
+                const randomTip = tips[Math.floor(Math.random() * tips.length)];
+                document.getElementById('ai-tip').textContent = randomTip;
+            }, 10000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundraising Hub - AI Business Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --funding-color: #7209b7;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        .pitch-card {
+            border-left: 4px solid var(--funding-color);
+            transition: transform 0.2s;
+        }
+        .pitch-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .investor-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .investor-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.1);
+        }
+        .match-score {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
+        }
+        .match-high { background: #10b981; }
+        .match-medium { background: #f59e0b; }
+        .match-low { background: #ef4444; }
+        .progress-funding {
+            height: 10px;
+            border-radius: 5px;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 3px solid white;
+        }
+        .template-card {
+            border: 2px dashed #d1d5db;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .template-card:hover {
+            border-color: var(--primary-color);
+            background: #f8fafc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 col-lg-2 d-md-block sidebar collapse p-0">
+                <div class="position-sticky pt-3">
+                    <div class="text-center p-4">
+                        <h4><i class="fas fa-robot me-2"></i>AI Business Assistant</h4>
+                        <small class="text-light">Small Business Platform</small>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="vendor-dashboard.html">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="advertising.html">
+                                <i class="fas fa-bullhorn me-2"></i>Advertising
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="content-studio.html">
+                                <i class="fas fa-pencil-alt me-2"></i>Content Studio
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i class="fas fa-hand-holding-usd me-2"></i>Fundraising
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="collaboration-board.html">
+                                <i class="fas fa-handshake me-2"></i>Collaboration
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="ai-assistant.html">
+                                <i class="fas fa-robot me-2"></i>AI Assistant
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="mt-5 p-3">
+                        <div class="card bg-dark text-white">
+                            <div class="card-body">
+                                <h6><i class="fas fa-lightbulb me-2"></i>Funding Tip</h6>
+                                <small id="funding-tip">Focus on your unique value proposition when pitching.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 col-lg-10 ms-sm-auto px-4 py-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2><i class="fas fa-hand-holding-usd me-2"></i>Fundraising Hub</h2>
+                        <p class="text-muted">Create pitches, find investors, and track funding progress</p>
+                    </div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPitchModal">
+                        <i class="fas fa-plus me-2"></i>New Pitch
+                    </button>
+                </div>
+
+                <!-- Funding Stats -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="text-muted">Active Pitches</h6>
+                                <h3 id="active-pitches">0</h3>
+                                <small class="text-muted">Seeking funding</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="text-muted">Total Funding Goal</h6>
+                                <h3 id="total-goal">$0</h3>
+                                <small class="text-muted">Across all pitches</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="text-muted">Investor Interest</h6>
+                                <h3 id="investor-interest">0</h3>
+                                <small class="text-muted">Total interested</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="text-muted">Success Rate</h6>
+                                <h3 id="success-rate">0%</h3>
+                                <small class="text-muted">Of completed pitches</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Pitch Assistant -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card" style="background: linear-gradient(135deg, #fdf4ff, #fae8ff);">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1"><i class="fas fa-robot me-2"></i>AI Pitch Assistant</h5>
+                                        <p class="mb-0" id="pitch-assistant-text">Get personalized feedback on your pitch deck</p>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="analyzePitch()">
+                                        <i class="fas fa-magic me-2"></i>Analyze My Pitch
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-4" id="fundraisingTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pitches-tab" data-bs-toggle="tab" data-bs-target="#pitches" type="button">
+                            My Pitches
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="investors-tab" data-bs-toggle="tab" data-bs-target="#investors" type="button">
+                            Investors <span class="badge bg-primary" id="investors-badge">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="templates-tab" data-bs-toggle="tab" data-bs-target="#templates" type="button">
+                            Templates
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline" type="button">
+                            Timeline
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="fundraisingTabsContent">
+                    <!-- Pitches Tab -->
+                    <div class="tab-pane fade show active" id="pitches" role="tabpanel">
+                        <div class="row" id="pitches-list">
+                            <div class="col-12 text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading your pitches...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Investors Tab -->
+                    <div class="tab-pane fade" id="investors" role="tabpanel">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" placeholder="Search investors..." id="investor-search">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="investor-industry">
+                                    <option value="">All Industries</option>
+                                    <option value="technology">Technology</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="retail">Retail</option>
+                                    <option value="finance">Finance</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="investor-stage">
+                                    <option value="">All Stages</option>
+                                    <option value="seed">Seed</option>
+                                    <option value="series-a">Series A</option>
+                                    <option value="series-b">Series B+</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row" id="investors-list">
+                            <!-- Investors will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Templates Tab -->
+                    <div class="tab-pane fade" id="templates" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="template-card" onclick="useTemplate('tech-startup')">
+                                    <i class="fas fa-laptop-code fa-3x mb-3 text-primary"></i>
+                                    <h5>Tech Startup</h5>
+                                    <p class="text-muted">Perfect for software and tech companies</p>
+                                    <small>10 slides | 2 hours</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="template-card" onclick="useTemplate('restaurant')">
+                                    <i class="fas fa-utensils fa-3x mb-3 text-primary"></i>
+                                    <h5>Restaurant & Food</h5>
+                                    <p class="text-muted">For food businesses and restaurants</p>
+                                    <small>8 slides | 1.5 hours</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="template-card" onclick="useTemplate('retail')">
+                                    <i class="fas fa-store fa-3x mb-3 text-primary"></i>
+                                    <h5>Retail Business</h5>
+                                    <p class="text-muted">For product-based businesses</p>
+                                    <small>9 slides | 2 hours</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Tab -->
+                    <div class="tab-pane fade" id="timeline" role="tabpanel">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="mb-4">Fundraising Timeline</h5>
+                                <div class="timeline" id="funding-timeline">
+                                    <div class="timeline-item">
+                                        <h6>Pitch Deck Created</h6>
+                                        <small class="text-muted">January 15, 2024</small>
+                                        <p>Initial pitch deck completed with AI assistance</p>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <h6>First Investor Meetings</h6>
+                                        <small class="text-muted">January 22, 2024</small>
+                                        <p>Presented to 5 potential investors</p>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <h6>Follow-up Due Diligence</h6>
+                                        <small class="text-muted">February 1, 2024</small>
+                                        <p>2 investors requested additional information</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Create Pitch Modal -->
+    <div class="modal fade" id="createPitchModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-file-invoice-dollar me-2"></i>Create New Pitch</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="pitchForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pitch Title *</label>
+                                <input type="text" class="form-control" id="pitchTitle" required placeholder="e.g., Innovative Tech Solution">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Funding Amount ($) *</label>
+                                <input type="number" class="form-control" id="fundingAmount" min="10000" step="1000" required placeholder="50000">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Problem Statement *</label>
+                            <textarea class="form-control" id="problemStatement" rows="3" required placeholder="What problem are you solving?"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Your Solution *</label>
+                            <textarea class="form-control" id="solution" rows="3" required placeholder="How does your product/service solve this problem?"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Market Size</label>
+                                <input type="text" class="form-control" id="marketSize" placeholder="e.g., $10B TAM">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Equity Offered (%)</label>
+                                <input type="number" class="form-control" id="equityOffered" min="1" max="50" step="1" placeholder="10">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Business Model</label>
+                            <textarea class="form-control" id="businessModel" rows="2" placeholder="How do you make money?"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Traction</label>
+                            <textarea class="form-control" id="traction" rows="2" placeholder="What have you achieved so far?"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Timeline</label>
+                            <textarea class="form-control" id="timeline" rows="2" placeholder="What are your key milestones?"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitPitch()">Create Pitch</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentVendorId = 1;
+        let pitches = [];
+        let investors = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPitches();
+            loadInvestors();
+            updateFundingTips();
+        });
+
+        // Load pitches
+        async function loadPitches() {
+            try {
+                // Simulate data - replace with API call
+                pitches = [
+                    {
+                        id: 1,
+                        title: "AI Marketing Platform",
+                        fundingAmount: 100000,
+                        equityOffered: 15,
+                        status: "active",
+                        investorInterest: 3,
+                        createdDate: "2024-01-15",
+                        problem: "Small businesses struggle with marketing automation",
+                        solution: "AI-powered marketing automation platform"
+                    },
+                    {
+                        id: 2,
+                        title: "Eco-Friendly Packaging",
+                        fundingAmount: 50000,
+                        equityOffered: 20,
+                        status: "draft",
+                        investorInterest: 1,
+                        createdDate: "2024-01-20",
+                        problem: "Plastic pollution from packaging",
+                        solution: "Biodegradable packaging solutions"
+                    }
+                ];
+                
+                renderPitches();
+                updateStats();
+            } catch (error) {
+                console.error('Error loading pitches:', error);
+            }
+        }
+
+        // Load investors
+        async function loadInvestors() {
+            try {
+                // Simulate data - replace with API call
+                investors = [
+                    {
+                        id: 1,
+                        name: "Sarah Johnson",
+                        firm: "Tech Ventures Fund",
+                        industry: "technology",
+                        stage: "seed",
+                        checkSize: "$50K - $500K",
+                        matchScore: 85
+                    },
+                    {
+                        id: 2,
+                        name: "Michael Chen",
+                        firm: "Growth Capital Partners",
+                        industry: "technology",
+                        stage: "series-a",
+                        checkSize: "$500K - $2M",
+                        matchScore: 72
+                    }
+                ];
+                
+                renderInvestors();
+            } catch (error) {
+                console.error('Error loading investors:', error);
+            }
+        }
+
+        // Render pitches
+        function renderPitches() {
+            const container = document.getElementById('pitches-list');
+            
+            if (pitches.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+                        <h5>No Pitches Yet</h5>
+                        <p class="text-muted">Create your first pitch to start fundraising</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPitchModal">
+                            <i class="fas fa-plus me-2"></i>Create Pitch
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            pitches.forEach(pitch => {
+                const statusClass = pitch.status === 'active' ? 'bg-success' : 
+                                  pitch.status === 'draft' ? 'bg-warning' : 'bg-secondary';
+                
+                html += `
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card pitch-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">${pitch.title}</h5>
+                                    <span class="badge ${statusClass}">${pitch.status}</span>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h4 class="text-primary">$${pitch.fundingAmount.toLocaleString()}</h4>
+                                    <small class="text-muted">Funding Goal • ${pitch.equityOffered}% equity</small>
+                                </div>
+                                
+                                <p class="card-text text-muted mb-3">${pitch.solution.substring(0, 100)}...</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <small class="text-muted">Investor Interest</small>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-friends me-1 text-primary"></i>
+                                            <span>${pitch.investorInterest} interested</span>
+                                        </div>
+                                    </div>
+                                    <div class="match-score match-high">85</div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editPitch(${pitch.id})">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success" onclick="viewInvestors(${pitch.id})">
+                                        <i class="fas fa-users"></i> Find Investors
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Render investors
+        function renderInvestors() {
+            const container = document.getElementById('investors-list');
+            
+            if (investors.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5>No Investors Found</h5>
+                        <p class="text-muted">Complete your pitch to see investor matches</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            investors.forEach(investor => {
+                const matchClass = investor.matchScore >= 80 ? 'match-high' :
+                                 investor.matchScore >= 60 ? 'match-medium' : 'match-low';
+                
+                html += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="investor-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="mb-1">${investor.name}</h5>
+                                    <p class="text-muted mb-1">${investor.firm}</p>
+                                </div>
+                                <div class="match-score ${matchClass}">
+                                    ${investor.matchScore}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <span class="badge bg-light text-dark me-2">
+                                    <i class="fas fa-industry me-1"></i> ${investor.industry}
+                                </span>
+                                <span class="badge bg-light text-dark">
+                                    <i class="fas fa-chart-line me-1"></i> ${investor.stage}
+                                </span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">Check Size</small>
+                                <p class="mb-0">${investor.checkSize}</p>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewInvestor(${investor.id})">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-primary" onclick="connectInvestor(${investor.id})">
+                                    <i class="fas fa-handshake"></i> Connect
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            document.getElementById('investors-badge').textContent = investors.length;
+        }
+
+        // Update statistics
+        function updateStats() {
+            const activePitches = pitches.filter(p => p.status === 'active').length;
+            const totalGoal = pitches.reduce((sum, p) => sum + p.fundingAmount, 0);
+            const totalInterest = pitches.reduce((sum, p) => sum + p.investorInterest, 0);
+            
+            document.getElementById('active-pitches').textContent = activePitches;
+            document.getElementById('total-goal').textContent = '$' + totalGoal.toLocaleString();
+            document.getElementById('investor-interest').textContent = totalInterest;
+        }
+
+        // Submit new pitch
+        async function submitPitch() {
+            const form = document.getElementById('pitchForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const pitchData = {
+                title: document.getElementById('pitchTitle').value,
+                fundingAmount: parseFloat(document.getElementById('fundingAmount').value),
+                problemStatement: document.getElementById('problemStatement').value,
+                solution: document.getElementById('solution').value,
+                marketSize: document.getElementById('marketSize').value,
+                equityOffered: parseInt(document.getElementById('equityOffered').value) || 0,
+                businessModel: document.getElementById('businessModel').value,
+                traction: document.getElementById('traction').value,
+                timeline: document.getElementById('timeline').value
+            };
+            
+            try {
+                // In production, POST to API
+                console.log('Creating pitch:', pitchData);
+                
+                // Add to local array
+                pitches.push({
+                    id: pitches.length + 1,
+                    ...pitchData,
+                    status: 'draft',
+                    investorInterest: 0,
+                    createdDate: new Date().toISOString().split('T')[0]
+                });
+                
+                // Reset form
+                form.reset();
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('createPitchModal')).hide();
+                
+                // Reload pitches
+                loadPitches();
+                
+                alert('Pitch created successfully!');
+                
+            } catch (error) {
+                console.error('Error creating pitch:', error);
+                alert('Failed to create pitch');
+            }
+        }
+
+        // Analyze pitch with AI
+        function analyzePitch() {
+            if (pitches.length === 0) {
+                alert('Please create a pitch first');
+                return;
+            }
+            
+            // Show analysis results
+            const analysis = `
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-robot me-2"></i>AI Pitch Analysis</h5>
+                    <p><strong>Strengths:</strong> Clear problem statement, innovative solution</p>
+                    <p><strong>Areas to Improve:</strong> Add more specific traction metrics</p>
+                    <p><strong>Recommendations:</strong> Include customer testimonials, add financial projections</p>
+                    <p><strong>Estimated Pitch Score:</strong> 78/100</p>
+                </div>
+            `;
+            
+            document.getElementById('pitch-assistant-text').innerHTML = analysis;
+        }
+
+        // Use template
+        function useTemplate(templateType) {
+            const templates = {
+                'tech-startup': {
+                    title: "Tech Startup Pitch",
+                    problem: "Businesses struggle with [specific problem]...",
+                    solution: "Our platform provides [unique solution]...",
+                    marketSize: "$10B total addressable market",
+                    businessModel: "Subscription-based SaaS",
+                    timeline: "6-12 months to launch"
+                },
+                'restaurant': {
+                    title: "Restaurant Business Plan",
+                    problem: "Limited dining options in [location]...",
+                    solution: "Upscale restaurant offering [unique cuisine]...",
+                    marketSize: "$5M local dining market",
+                    businessModel: "Direct sales with catering",
+                    timeline: "3-6 months to opening"
+                }
+            };
+            
+            const template = templates[templateType];
+            if (template) {
+                document.getElementById('pitchTitle').value = template.title;
+                document.getElementById('problemStatement').value = template.problem;
+                document.getElementById('solution').value = template.solution;
+                document.getElementById('marketSize').value = template.marketSize;
+                document.getElementById('businessModel').value = template.businessModel;
+                document.getElementById('timeline').value = template.timeline;
+                
+                alert(`"${templateType.replace('-', ' ')}" template applied!`);
+            }
+        }
+
+        // Update funding tips
+        function updateFundingTips() {
+            const tips = [
+                "Focus on your unique value proposition when pitching",
+                "Prepare for common investor questions in advance",
+                "Show traction with early customers or prototypes",
+                "Know your numbers: market size, unit economics",
+                "Practice your pitch until it feels natural"
+            ];
+            
+            setInterval(() => {
+                const randomTip = tips[Math.floor(Math.random() * tips.length)];
+                document.getElementById('funding-tip').textContent = randomTip;
+            }, 10000);
+        }
+
+        // Placeholder functions
+        function editPitch(id) {
+            alert(`Edit pitch ${id} - This would open edit modal`);
+        }
+
+        function viewInvestors(pitchId) {
+            alert(`Finding investors for pitch ${pitchId}`);
+            // Switch to investors tab and filter
+            const investorsTab = document.getElementById('investors-tab');
+            investorsTab.click();
+        }
+
+        function viewInvestor(id) {
+            alert(`Viewing investor ${id} details`);
+        }
+
+        function connectInvestor(id) {
+            if (confirm('Send connection request to this investor?')) {
+                alert(`Connection request sent to investor ${id}`);
+            }
+        }
+    </script>
+</body>
+</html>
